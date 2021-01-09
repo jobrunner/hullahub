@@ -1,1 +1,2 @@
-# hullahub
+# Hullahub
+A web dev crochet project for experimenting and lerning.

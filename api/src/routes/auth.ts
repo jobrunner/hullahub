@@ -14,4 +14,4 @@ router.get("/auth/verify/:id", (request: Request, response: Response, next: Next
     response.status(200).send("Ok, verified the email")
 })
 
-export { router as authRoute }
+export { router as route }

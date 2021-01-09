@@ -1,4 +1,3 @@
-// import { Router } from "express"
 import * as express from "express"
 import * as controller from "../controllers"
 
@@ -19,4 +18,4 @@ router.post("/users", controller.user.createAction)
 // Changes a user differes from register (admin only or manager of a membership)
 router.put("/users/:id", controller.user.updateAction)
 
-export { router as userRoute }
+export { router as route }

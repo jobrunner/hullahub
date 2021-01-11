@@ -8,6 +8,11 @@ import * as models from "../models"
 import * as userService from "./user"
 import * as Error from "../errors"
 
+export interface VerifyDecoded {
+    uid: string 
+    gid: string
+}
+
 export const login = async (login: string, password: string) => {
     const user = await findBylogin(login)
     if (user.password_hash == undefined) {
@@ -61,6 +66,23 @@ export const register = async (email: string, password: string, groupId = 1): Pr
         console.log(error)
         throw new Error.CreateError("Registration failed")
     }    
+}
+
+export const refreshToken = async (token: string): Promise<string> => {
+    try {
+        const verified = jwt.verify(token, config.APP_TOKEN_SECRET) as VerifyDecoded
+        return jwt.sign({
+            exp: Math.floor(Date.now() / 1000) + (30), // 30s
+            alg: config.APP_TOKEN_JWT_ALG,
+            typ: "JWT",
+            uid: verified.uid,
+            gid: verified.gid
+        }, config.APP_TOKEN_SECRET as jwt.Secret)
+    }
+    catch (error) {
+        console.log(error)
+        throw new Error.RefreshError(error.message)
+    }
 }
 
 const findBylogin = async (value: string): Promise<models.User> => {

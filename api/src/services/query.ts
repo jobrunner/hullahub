@@ -5,9 +5,8 @@ export type LimitedResponse = {offset: number, rowCount: number} | undefined
 export type QueryParamBindable<T> = {clause: string, values: Array<T>}
 export type DataItemBase<T> = {record: T}
 export type DataCollectionBase<T> = {records: T[], meta: {records: number, of: number}}
-export type DataItem<T> = DataItemBase<T> | DataError
-export type DataCollection<T> = DataCollectionBase<T> | DataError
-export type DataError = {error: Error}
+export type DataItem<T> = DataItemBase<T>
+export type DataCollection<T> = DataCollectionBase<T>
 
 export const parseOrderBy = (sortDescriptor: string, sortWhiteList: Array<string>): SortedResponse => {
     if (sortDescriptor == undefined) {
@@ -68,8 +67,5 @@ export const parseLimiter = (limitDescriptor: string): LimitedResponse => {
     const pageNumber = limitParams[0] as number
     const pageSize = limitParams[1] as number
 
-        // angefordert: Seite 1 mit 100 Sätzen => limit (1 - 1)*100,100 = 0,100
-        //              Seite 2 mit 100 Sätzen => limit (2 - 1)*100,100 = 100,100
-        
     return {offset: (pageNumber - 1) * pageSize, rowCount: pageSize}
 }

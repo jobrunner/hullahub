@@ -1,4 +1,5 @@
 import { Request, Response } from "express"
+import * as Error from "../../errors"
 import * as services from "../../services"
 
 // Login
@@ -7,14 +8,16 @@ export const loginAction = async (request: Request, response: Response) => {
     let login = request.body.login
     let password = request.body.password
     if (!login || !password) {
-        return response.status(400).send({"message": "Bad Request"})
+        const e = new Error.BadRequestError()
+        return response.status(e.status).send(e.json)
     }
 
     try {
         let token = await services.auth.login(login, password)
-        return response.header("Authorization", "Bearer " + token).send({"jwt-token": token})
+        return response.header("Authorization", "Bearer " + token).send({"jwt": token})
     }
     catch {
-        return response.status(404).send({"message": "User not found"})
+        const e = new Error.NotFoundError("User not found")
+        return response.status(e.status).send(e.json)
     }
 }

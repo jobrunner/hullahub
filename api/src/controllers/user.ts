@@ -1,16 +1,17 @@
 import { Request, Response } from "express"
-import { NotFoundError } from "../errors"
+import * as Error from "../errors"
 import * as services from "../services"
-import { HashTable } from "../services"
+import { HashTable, DataCollection } from "../services"
 
 export const retrieveAction = async (request: Request, response: Response): Promise<void> => {
     const predicateDescriptor: HashTable<string> = {id: request.params.id}
     const limitDescriptor = {offset: 0, rowCount: 1}
+    const e = new Error.NotFoundError("User not found")
     try {
-        
-        const users = await services.user.search(predicateDescriptor, undefined, limitDescriptor)
+        const users = await services.user.search<DataCollection<User>>(predicateDescriptor, undefined, limitDescriptor)
         if (users === undefined) {
-            throw new NotFoundError("User not found")
+            response.status(e.status).send(e.json)
+            return
         }
         // @todo here is another type foo to resolve
         // if (users.meta.records == 1) {
@@ -21,7 +22,7 @@ export const retrieveAction = async (request: Request, response: Response): Prom
         // }
     } catch (error) {
         console.log(error)
-        response.status(404).send({"error": "User not found"})
+        response.status(e.status).send(e.json)
     }
 }
 

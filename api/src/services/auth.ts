@@ -6,14 +6,12 @@ import { connectionPool } from "./mysql"
 import config from "../config"
 import * as models from "../models"
 import * as userService from "./user"
-import { LoginError,
-         CreateError, 
-         NotFoundError } from "../errors"
+import * as Error from "../errors"
 
 export const login = async (login: string, password: string) => {
     const user = await findBylogin(login)
     if (user.password_hash == undefined) {
-        throw new LoginError("Login not possible")
+        throw new Error.LoginError("Login not possible")
     }
     await bcrypt.compare(password, user.password_hash)
 
@@ -30,10 +28,10 @@ export const login = async (login: string, password: string) => {
     }, config.APP_TOKEN_SECRET as jwt.Secret)
 }
 
-export const register = async (username: string, email: string, password: string) => {
+export const register = async (email: string, password: string, groupId = 1): Promise<models.User> => {
     // @todo Ein bisschen mehr, darf es dann doch schon sein... => joi
-    if (!username || !email || ! password) {
-        throw new CreateError("Must be username, email and password")
+    if (!email || ! password) {
+        throw new Error.BadRequestError("Bad Request. Omitted email and/or password")
     }
 
     const userId = uuid.v4()
@@ -61,22 +59,22 @@ export const register = async (username: string, email: string, password: string
     }
     catch (error) {
         console.log(error)
-        throw new CreateError(error)
+        throw new Error.CreateError("Registration failed")
     }    
 }
 
 const findBylogin = async (value: string): Promise<models.User> => {
     const sql = "SELECT * FROM user WHERE username = ? OR email = ? LIMIT 1"
     const params = [value, value]
-    
-    // let rows: Array<Model.User> = []
-    // const [rows]: [Array<Model.User>] = await connectionPool.query(sql, params);
-    const [rows] = await connectionPool.query<RowDataPacket[]>(sql, params);
-    console.log(rows)
-
-    if (rows.length) {
-        return rows[0] as models.User
-    } else {
-        throw new NotFoundError("User does not exist");
+    try {
+        const [rows] = await connectionPool.query<RowDataPacket[]>(sql, params);
+        if (rows.length) {
+            return rows[0] as models.User
+        } else {
+            throw new Error.NotFoundError("User does not exist");
+        }
+    }
+    catch(error) {
+        throw new Error.NotFoundError(error.message);
     }
 }

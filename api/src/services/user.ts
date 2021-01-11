@@ -9,13 +9,13 @@ export type User = RowDataPacket | models.User
 
 export const filter = async (criterias: HashTable<string> = {}, 
                              order: HashTable<string> = {}, 
-                             limit: HashTable<number> = {}) => {    
+                             limit: HashTable<number> = {}): Promise<DataCollection<User>> => {
     return filterSearch(criterias, order, limit, false)
 }
 
 export const search = async (criterias: HashTable<string> = {}, 
                              order: HashTable<string> = {}, 
-                             limit: HashTable<number> = {}) => {
+                             limit: HashTable<number> = {}): Promise<DataCollection<User>> => {
     return filterSearch(criterias, order, limit, true)
 }
 
@@ -61,9 +61,9 @@ const filterSearch = async (criterias: HashTable<string>,
     return collection
 }
 
-const makeWhereBindables = (filter: HashTable<string>, searchMode: boolean = false): QueryParamBindable<string>|null => {
+const makeWhereBindables = (filter: HashTable<string>, searchMode: boolean = false): QueryParamBindable<string> | undefined => {
     if (!filter || Object.keys(filter).length === 0) {
-        return null
+        return undefined
     }
 
     let clauses: Array<string> = []
@@ -82,9 +82,7 @@ const makeWhereBindables = (filter: HashTable<string>, searchMode: boolean = fal
         whereClause = "WHERE" + clauses.join(` ${connectionLogic}`)
     }
 
-    const bindables: QueryParamBindable<string> = {clause: whereClause, values: values}
-
-    return bindables
+    return {clause: whereClause, values: values}
 }
 
 const makeOrderByClause = (order: HashTable<string>): QueryParamBindable<string> | undefined => {
@@ -98,9 +96,7 @@ const makeOrderByClause = (order: HashTable<string>): QueryParamBindable<string>
         sortOrderClauses.push(`${key} ${val}`)
     }
     const orderByClause = "ORDER BY " + sortOrderClauses.join(",")
-    const bindable: QueryParamBindable<string> = {clause: orderByClause, values: []}
-    
-    return bindable
+    return {clause: orderByClause, values: []}
 }
 
 const makeLimitBindables = (limit: HashTable<number>): QueryParamBindable<number> | undefined => {
@@ -108,11 +104,10 @@ const makeLimitBindables = (limit: HashTable<number>): QueryParamBindable<number
         return undefined
     }
 
-    const bindables: QueryParamBindable<number> = {
+    return {
         clause: "LIMIT ?,?",
         values: [limit.offset, limit.rowCount]  
     }
-    return bindables
 }
 
 export const create = async (user: models.User): Promise<void> => {

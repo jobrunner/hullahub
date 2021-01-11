@@ -1,4 +1,5 @@
-import dotenv = require("dotenv")
+import dotenv from "dotenv"
+import { Secret } from "jsonwebtoken"
 
 dotenv.config()
 
@@ -12,6 +13,7 @@ export default {
     NODE_ADDR: String(process.env.NODE_ADDR || "127.0.0.1"),
     NODE_ENV: process.env.NODE_ENV || "development",
     MORGAN_LOGGING_FORMAT: process.env.MORGAN_LOGGING_FORMAT || "tiny",
-    APP_TOKEN_SECRET: process.env.APP_TOKEN_SECRET,
-    APP_TOKEN_JWT_ALG: String(process.env.APP_TOKEN_JWT_ALG || "HS256")
+    APP_TOKEN_SECRET: process.env.APP_TOKEN_SECRET as Secret,
+    APP_TOKEN_JWT_ALG: String(process.env.APP_TOKEN_JWT_ALG || "HS256"),
+    APP_TOKEN_EXPIRATION: Number(process.env.APP_TOKEN_EXPIRATION || 60 * 60) // 1h
 }

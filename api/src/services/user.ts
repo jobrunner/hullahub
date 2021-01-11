@@ -124,3 +124,6 @@ export const changeEmailRequest = async (userId: string): Promise<void> => {
 export const changePasswordRequest = async (userId: string): Promise<void> => {
     // erzeuge ein change token für die Änderung des Passworts mit einer begrenzten zeitlichen Gültigkeit
 }
+
+export const changeUsername = async (userId: string, username: string): Promise<void> => {    
+}

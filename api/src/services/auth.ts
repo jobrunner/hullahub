@@ -20,13 +20,10 @@ export const login = async (login: string, password: string) => {
     }
     await bcrypt.compare(password, user.password_hash)
 
-    // Achtung: je nach neuen Ressourcen, die der Anwender zugreifen darf,
-    //          muss das token angepasst werden. D.h., ein User muss, wenn dieser
-    //          Fall eintrat, ein neues Token anfordern! => refresh
-
     // create the JWT
     return jwt.sign({
         alg: config.APP_TOKEN_JWT_ALG,
+        exp: Math.floor(Date.now() / 1000) + (config.APP_TOKEN_EXPIRATION),
         typ: "JWT",
         uid: user.id,
         gid: user.group_id
@@ -44,11 +41,10 @@ export const register = async (email: string, password: string, groupId = 1): Pr
     const passwordHash = await bcrypt.hash(password, salt)
     const createdAt = new Date()
     const status = 1
-    const groupId = 1
 
     const user: models.User = {
         id: userId,
-        username: username || uuid.v4(),
+        username: userId,
         email: email,
         name: "",
         password_hash: passwordHash,

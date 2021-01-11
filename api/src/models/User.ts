@@ -18,7 +18,7 @@ export interface User extends UserPub {
 
 export const createUser = async (email: string, password: string, groupId: number = 1) => {
     const id = uuid.v4()
-    const username = email
+    const username = id
     const salt = await bcrypt.genSalt(10)
     const password_hash = await bcrypt.hash(password, salt)
     const group_id = groupId

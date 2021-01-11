@@ -24,7 +24,7 @@ export const registerAction = async (request: Request, response: Response): Prom
         response.status(200).send(user)
     }
     catch (error) {
-        const e = new Error.RegisterError(`Bad Request (${error.message})`)
+        const e = new Error.RegisterError(`${error.message}`)
         response.status(e.status).send(e.json)
     }    
 }

@@ -59,8 +59,10 @@ export const register = async (email: string, password: string, groupId = 1): Pr
         return user
     }
     catch (error) {
-        console.log(error)
-        throw new Error.CreateError("Registration failed")
+        if (error.code == "ER_DUP_ENTRY") {
+            throw new Error.RegisterError("Registration failed: The email address is already in use.")
+        }
+        throw new Error.RegisterError("Registration failed")
     }    
 }
 

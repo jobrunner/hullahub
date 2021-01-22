@@ -1,7 +1,7 @@
-import * as express from "express"
+import { Router } from "express"
 import * as controller from "../controllers"
 
-const router = express.Router({caseSensitive: true})
+const router: Router = Router({caseSensitive: true, mergeParams: true})
 
 // Retrive a user list
 router.get("/users", controller.user.searchAction)

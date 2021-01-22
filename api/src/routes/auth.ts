@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response, Router } from "express"
 import * as controller from "../controllers"
 
-const router: Router = Router({caseSensitive: true})
+const router: Router = Router({caseSensitive: true, mergeParams: true})
 
 // Register a new User
 router.post("/auth/register", controller.auth.registerAction)

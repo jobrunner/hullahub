@@ -7,15 +7,18 @@ import config from "./config"
 
 const app = express()
 
-app.use(middleWare.defaults.corseAll)
 app.use(logger(config.MORGAN_LOGGING_FORMAT))
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use("/api/v1", routes.auth.route)
-app.use("/api/v1", middleWare.auth.authorize, middleWare.auth.loggedInOnly, routes.user.route)
+app.use(middleWare.defaults.corse)
 
-app.use(middleWare.defaults.finaly404)
+const authInTheMiddle = [middleWare.defaults.version, middleWare.auth.authorize, middleWare.auth.loggedInOnly]
+
+app.use("/api/:version(\\d+)", middleWare.defaults.version, routes.auth.route)
+app.use("/api/:version(\\d+)", authInTheMiddle, routes.user.route)
+
+app.use(middleWare.defaults.finallyNotFound)
 
 app.listen(config.NODE_PORT, config.NODE_ADDR, () => {
     console.log(`Server running on ${config.NODE_ADDR}:${config.NODE_PORT}`)

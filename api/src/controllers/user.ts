@@ -34,8 +34,8 @@ export const searchAction = async (request: Request, response: Response): Promis
         "id", "email", "username", "created_at", 
         "updated_at", "group_id", "status",
     ]
-    const sortDescriptor = request.query.sort as string
     const filterDescriptor = request.query as HashTable<string>
+    const sortDescriptor = request.query.sort as string
     const limiterDescriptor = request.query.page as string
 
     const filterDescription = services.parseFilters(filterDescriptor, fieldWhiteList)

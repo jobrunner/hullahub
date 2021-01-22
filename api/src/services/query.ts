@@ -42,7 +42,7 @@ export const parseOrderBy = (sortDescriptor: string, sortWhiteList: Array<string
 }
 
 export const parseFilters = (filterDescriptor: HashTable<string>, 
-                           fieldWhiteList: Array<string>): FilteredResponse => {
+                             fieldWhiteList: Array<string>): FilteredResponse => {
     let where: FilteredResponse = {}
     var clauses: Array<string> = []
     var values: Array<string> = []

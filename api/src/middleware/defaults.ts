@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express"
 import * as Error from "../errors"
 
 // Returns always full open CORS Headers
-export const corseAll = async (request: Request, response: Response, next: NextFunction) => {
+export const corse = async (request: Request, response: Response, next: NextFunction): Promise<void> => {
     response.setHeader("Access-Control-Allow-Origin", "*");
     response.setHeader("Access-Control-Allow-Methods", "*");
     response.setHeader("Access-Control-Allow-Headers", "*");

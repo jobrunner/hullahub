@@ -44,7 +44,6 @@ export const searchAction = async (request: Request, response: Response): Promis
     
     try {
         const users = await services.user.search(filterDescription, orderDescription, limitDescription)
-        console.log(users)
         response.send(users)
     } catch (error) {
         console.log(error)

@@ -1,2 +1,4 @@
 export * as auth from "./auth"
-export * as user from "./user"
+export * as users from "./users"
+export * as groups from "./groups"
+export * as clients from "./clients"

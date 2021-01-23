@@ -3,12 +3,14 @@ import config from "../config"
 import jwt from "jsonwebtoken"
 import * as Error from "../errors"
 
-export const authorize = async (request: Request, response: Response, next: NextFunction) => {
+const authorize = async (request: Request, response: Response): Promise<void> => {
+    if (response.locals.authorized) {
+        return
+    }
+
     let token = request.header('Authorization')
     if (!token) {
-        const e = new Error.UnauthorizedError()
-        response.status(e.status).send(e.json)
-        return
+        throw new Error.UnauthorizedError()
     }
 
     try {
@@ -17,47 +19,90 @@ export const authorize = async (request: Request, response: Response, next: Next
         }
         const verified = jwt.verify(token, config.APP_TOKEN_SECRET)
         response.locals.authorized = verified
-        next()
     }
     catch (error) {
-        const e = new Error.UnauthorizedError(error.message)
-        response.status(e.status).send(e.json)
+        throw new Error.UnauthorizedError(error.message)
     }
 }
 
-export const loggedInOnly = async (request: Request, response: Response, next: NextFunction) => {
-    let groupId = response.locals.authorized.gid
-    if (groupId >= 1) {
-        return next()
-    }  
-    const error = new Error.UnauthorizedError()
-    response.status(error.status).send(error.json);
-}
-
-export const ownerOnly = async (request: Request, response: Response, next: NextFunction) => {
-    let groupId = response.locals.authorized.gid
-    if (groupId === 1) {
-        next()
-        return
-    }
-
-    if (groupId <= 2) { 
-        let request_url = request.baseUrl + request.route.path
-        let userId = response.locals.authorized.uid
-        if (request_url.includes("users/:id") && parseInt(request.params.id) === userId) {
+export const allowClients = async (request: Request, response: Response, next: NextFunction): Promise<void> => {
+    // Access tbd. Currently a client can access others "clients" ressources...
+    try {
+        await authorize(request, response)
+        let groupId = parseInt(response.locals.authorized.gid)
+        if (groupId !== NaN && groupId > 0 && groupId < 4) {
             next()
-            return 
+            return
         }
+        throw new Error.UnauthorizedError()
     }
-    const error = new Error.ForbiddenError()
-    response.status(error.status).send(error.json);
+    catch {
+        const error = new Error.UnauthorizedError()
+        response.status(error.status).send(error.json);
+    }
 }
 
-export const adminOnly = async (request: Request, response: Response, next: NextFunction) => {
-    let groupId = response.locals.authorized.gid
-    if (groupId === 1) {
-        next()
-    }  
-    const error = new Error.ForbiddenError()
-    response.status(error.status).send(error.json);
+export const allowOwners = async (request: Request, response: Response, next: NextFunction): Promise<void> => {
+    try {
+        await authorize(request, response)
+        let groupId = parseInt(response.locals.authorized.gid)
+        if (groupId !== NaN && groupId === 1) {
+            next()
+            return
+        }
+
+        if (groupId !== NaN && groupId >= 2 && groupId <= 3) { 
+            let request_url = request.baseUrl + request.route.path
+            let userId = response.locals.authorized.uid
+            if (request_url.includes("users/:userId") && parseInt(request.params.userId) === userId) {
+                next()
+                return 
+            }
+        }
+        throw new Error.UnauthorizedError()
+    }
+    catch {
+        const error = new Error.ForbiddenError()
+        response.status(error.status).send(error.json);
+    }
+}
+
+export const allowClientManagers = async (request: Request, response: Response, next: NextFunction): Promise<void> => {
+    try {
+        await authorize(request, response)
+        let groupId = parseInt(response.locals.authorized.gid)
+        if (groupId !== NaN && groupId === 1) {
+            next()
+            return
+        }
+        if (groupId !== NaN && groupId === 2) { 
+            let request_url = request.baseUrl + request.route.path
+            let clientId = response.locals.authorized.cid
+            if (request_url.includes("/:clientId") && request.params.clientId === clientId) {
+                next()
+                return 
+            }
+        }
+        throw new Error.UnauthorizedError()
+    }
+    catch {
+        const error = new Error.ForbiddenError()
+        response.status(error.status).send(error.json);
+    }
+}
+
+export const allowAdmins = async (request: Request, response: Response, next: NextFunction): Promise<void> => {
+    try {
+        await authorize(request, response)
+        let groupId = parseInt(response.locals.authorized.gid)
+        if (groupId !== NaN && groupId === 1) {
+            next()
+            return
+        }
+        throw new Error.UnauthorizedError()
+    }
+    catch {
+        const error = new Error.ForbiddenError()
+        response.status(error.status).send(error.json);
+    }
 }

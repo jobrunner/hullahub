@@ -2,6 +2,7 @@ export type HashTable<T> = {[index: string]: T}
 export type FilteredResponse = HashTable<string> | undefined
 export type SortedResponse = HashTable<string> | undefined
 export type LimitedResponse = {offset: number, rowCount: number} | undefined
+export type SetResponse = HashTable<string> | undefined
 export type QueryParamBindable<T> = {clause: string, values: Array<T>}
 export type DataItemBase<T> = {record: T}
 export type DataCollectionBase<T> = {records: T[], meta: {records: number, of: number}}
@@ -44,14 +45,14 @@ export const parseOrderBy = (sortDescriptor: string, sortWhiteList: Array<string
 export const parseFilters = (filterDescriptor: HashTable<string>, 
                              fieldWhiteList: Array<string>): FilteredResponse => {
     let where: FilteredResponse = {}
-    var clauses: Array<string> = []
-    var values: Array<string> = []
+    // var clauses: Array<string> = []
+    // var values: Array<string> = []
 
     for (let key in filterDescriptor) {
         if (filterDescriptor.hasOwnProperty(key) && fieldWhiteList.includes(key)) {
             where[key] = filterDescriptor[key] 
-            clauses.push(` ${key} = ?`)
-            values.push(filterDescriptor[key])
+            // clauses.push(` ${key} = ?`)
+            // values.push(filterDescriptor[key])
         }
     }
     return where == {} ? undefined : where
@@ -68,4 +69,20 @@ export const parseLimiter = (limitDescriptor: string): LimitedResponse => {
     const pageSize = limitParams[1] as number
 
     return {offset: (pageNumber - 1) * pageSize, rowCount: pageSize}
+}
+
+export const parseSet = (setDescriptor: HashTable<string>, 
+                         fieldWhiteList: Array<string>): SetResponse => {
+    let set: SetResponse = {}
+    // var clauses: Array<string> = []
+    // var values: Array<string> = []
+
+    for (let key in setDescriptor) {
+        if (setDescriptor.hasOwnProperty(key) && fieldWhiteList.includes(key)) {
+            set[key] = setDescriptor[key] 
+            // clauses.push(` ${key} = ?`)
+            // values.push(setDescriptor[key])
+        }
+    }
+    return set == {} ? undefined : set
 }

@@ -23,7 +23,7 @@ const filterSearch = async (criterias: HashTable<string>,
                             order: HashTable<string>, 
                             limit: HashTable<number>, 
                             searchMode: boolean = false): Promise<DataCollection<User>> => {
-    let sql = "SELECT SQL_CALC_FOUND_ROWS id,email,username,created_at,updated_at,group_id,status FROM user"
+    let sql = "SELECT SQL_CALC_FOUND_ROWS user.id,email,username,createdAt,updatedAt,groupId,clientId,status,client.name AS client FROM user LEFT JOIN client ON (user.clientId = client.id)"
     let values: Array<any> = []
 
     const whereBindable = makeWhereBindables(criterias, searchMode)
@@ -111,10 +111,14 @@ const makeLimitBindables = (limit: HashTable<number>): QueryParamBindable<number
 }
 
 export const create = async (user: models.User): Promise<void> => {
-    const name = user.name
-    const userId = user.id
     await connectionPool.query("INSERT INTO user SET ?", user)
-    await connectionPool.query("INSERT INTO member SET user_id = ?, name = ?", [userId, name])
+}
+
+export const update = async (user: models.User): Promise<void> => {
+    const changeSet = user as any
+    const userId = user.id
+    delete changeSet.id
+    await connectionPool.query("UPDATE user SET ? WHERE id = ?", [changeSet, userId])
 }
 
 export const changeEmailRequest = async (userId: string): Promise<void> => {    

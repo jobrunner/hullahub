@@ -7,34 +7,35 @@ export interface UserPub {
     email: string
     name: string
     status: number
-    created_at: Date
-    updated_at?: Date
-    group_id: number
+    createdAt: Date
+    updatedAt?: Date
+    groupId: number
+    clientId: string | null
 }
 
 export interface User extends UserPub {
-    password_hash?: string
+    passwordHash?: string
 }
 
-export const createUser = async (email: string, password: string, groupId: number = 1) => {
+export const createUser = async (email: string, password: string, groupId: number = 1, clientId: string|null = null) => {
     const id = uuid.v4()
     const username = id
     const salt = await bcrypt.genSalt(10)
-    const password_hash = await bcrypt.hash(password, salt)
-    const group_id = groupId
+    const passwordHash = await bcrypt.hash(password, salt)
     const status = 1
     const name = ""
-    const created_at = new Date()
+    const createdAt = new Date()
 
     const user: User = {
         id,
         email,
         username,
-        password_hash,
-        group_id,
+        passwordHash,
+        groupId,
+        clientId,
         status,
         name,
-        created_at
+        createdAt
     }
 
     return user

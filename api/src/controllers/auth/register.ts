@@ -18,7 +18,7 @@ export const registerAction = async (request: Request, response: Response): Prom
     try {
         const user = await services.auth.register(email, password)
         // @todo Send verification email <here>
-        delete user.password_hash
+        delete user.passwordHash
 
         // @todo standard return type for single item
         response.status(200).send(user)

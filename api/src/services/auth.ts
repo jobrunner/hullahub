@@ -11,14 +11,15 @@ import * as Error from "../errors"
 export interface VerifyDecoded {
     uid: string 
     gid: string
+    cid: string | null
 }
 
 export const login = async (login: string, password: string) => {
     const user = await findBylogin(login)
-    if (user.password_hash == undefined) {
+    if (user.passwordHash == undefined) {
         throw new Error.LoginError("Login not possible")
     }
-    await bcrypt.compare(password, user.password_hash)
+    await bcrypt.compare(password, user.passwordHash)
 
     // create the JWT
     return jwt.sign({
@@ -26,11 +27,12 @@ export const login = async (login: string, password: string) => {
         exp: Math.floor(Date.now() / 1000) + (config.APP_TOKEN_EXPIRATION),
         typ: "JWT",
         uid: user.id,
-        gid: user.group_id
+        gid: user.groupId,
+        cid: user.clientId
     }, config.APP_TOKEN_SECRET as jwt.Secret)
 }
 
-export const register = async (email: string, password: string, groupId = 1): Promise<models.User> => {
+export const register = async (email: string, password: string, groupId = 3, clientId = null): Promise<models.User> => {
     // @todo Ein bisschen mehr, darf es dann doch schon sein... => joi
     if (!email || ! password) {
         throw new Error.BadRequestError("Bad Request. Omitted email and/or password")
@@ -47,15 +49,16 @@ export const register = async (email: string, password: string, groupId = 1): Pr
         username: userId,
         email: email,
         name: "",
-        password_hash: passwordHash,
+        passwordHash: passwordHash,
         status: status,
-        created_at: createdAt,
-        group_id: groupId
+        createdAt: createdAt,
+        groupId: groupId,
+        clientId: clientId
     }
 
     try {
         await userService.create(user)
-        delete user.password_hash
+        delete user.passwordHash
         return user
     }
     catch (error) {
@@ -70,11 +73,12 @@ export const refreshToken = async (token: string): Promise<string> => {
     try {
         const verified = jwt.verify(token, config.APP_TOKEN_SECRET) as VerifyDecoded
         return jwt.sign({
-            exp: Math.floor(Date.now() / 1000) + (30), // 30s
+            exp: Math.floor(Date.now() / 1000) + (config.APP_TOKEN_EXPIRATION),
             alg: config.APP_TOKEN_JWT_ALG,
             typ: "JWT",
             uid: verified.uid,
-            gid: verified.gid
+            gid: verified.gid,
+            cid: verified.cid
         }, config.APP_TOKEN_SECRET as jwt.Secret)
     }
     catch (error) {
